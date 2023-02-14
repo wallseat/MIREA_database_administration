@@ -1,0 +1,13 @@
+version: '3.9'
+
+services:
+  mongo:
+    image: mongo:6.0.4-jammy
+    container_name: da-mongo
+    ports:
+      - 27017:27017
+    volumes:
+      - ./data:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ADMIN_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ADMIN_PASSWORD}

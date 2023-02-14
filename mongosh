@@ -1,0 +1,31 @@
+#!/bin/bash
+
+SCRIPT_DIR=$(dirname -- "$0")
+
+pushd $SCRIPT_DIR
+
+get_container_id() {
+    CONTAINER_ID=$(docker ps -f name=da-mongo -q)
+}
+
+get_container_id
+
+if [ -z "$CONTAINER_ID" ]; then
+    echo "No container found with name 'da-mongo'"
+    echo "Starting container..."
+    docker compose up -d
+    get_container_id
+    if [ -z "$CONTAINER_ID" ]; then
+        echo "Failed to start container"
+        exit 1
+    fi
+   
+fi
+
+while [ -z "$(docker logs $CONTAINER_ID 2>&1 | grep 'Waiting for connections')" ]; do
+    sleep 1
+done
+
+docker compose exec -it mongo /bin/bash -c "mongosh -u $MONGO_INITDB_ROOT_USERNAME -p $MONGO_INITDB_ROOT_PASSWORD"
+
+popd
