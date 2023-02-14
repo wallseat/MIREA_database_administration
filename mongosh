@@ -1,5 +1,6 @@
 #!/bin/bash
 
+WORKING_DIR=$(pwd)
 SCRIPT_DIR=$(dirname -- "$0")
 
 pushd $SCRIPT_DIR
@@ -26,6 +27,11 @@ while [ -z "$(docker logs $CONTAINER_ID 2>&1 | grep 'Waiting for connections')" 
     sleep 1
 done
 
-docker compose exec -it mongo /bin/bash -c "mongosh -u $MONGO_INITDB_ROOT_USERNAME -p $MONGO_INITDB_ROOT_PASSWORD"
+# without arguments, open a shell
+if [ $# -eq 0 ]; then
+    docker compose exec -it mongo /bin/bash -c 'mongosh -u $MONGO_INITDB_ROOT_USERNAME -p $MONGO_INITDB_ROOT_PASSWORD'
+else # otherwise, run the command
+    docker compose exec -T mongo /bin/bash -c 'mongosh -u $MONGO_INITDB_ROOT_USERNAME -p $MONGO_INITDB_ROOT_PASSWORD' < $WORKING_DIR/$1
+fi
 
 popd

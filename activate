@@ -1,0 +1,8 @@
+# This file must be used with "source bin/activate" *from bash*
+# you cannot run it directly
+
+export PATH=$PATH:$(pwd)
+
+if [ -f .env ]; then
+  export $(echo $(cat .env | sed 's/#.*//g'| xargs) | envsubst)
+fi
