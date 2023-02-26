@@ -385,7 +385,7 @@ const testDataUtils = {
     }
 }
 
-const querySet = {
+const taskQuery = {
     getAllProductTypes: function () { // Получение списка всех категорий
         return db.productTypes.find();
     },
@@ -593,20 +593,199 @@ const querySet = {
     }
 }
 
+function initUsers() {
+    db.createRole( // Создание роли для просмотра продуктов
+        {
+            role: "products_viewer",
+            privileges: [
+                {
+                    actions: ["find"],
+                    resource: { db: "shop", collection: "products" }
+                },
+                {
+                    actions: ["find"],
+                    resource: { db: "shop", collection: "productTypes" }
+                }
+            ],
+            roles: []
+        }
+    )
+
+    db.createRole( // Создание роли администратора
+        {
+            role: "admin",
+            privileges: [
+                {
+                    actions: ["insert", "update", "remove"],
+                    resource: { db: "shop", collection: "" }
+                }
+            ],
+            roles: [
+                "products_viewer",
+            ]
+        }
+    )
+
+    db.createRole( // Создание роли менеджера
+        {
+            role: "manager",
+            privileges: [
+                {
+                    actions: ["insert", "update", "remove"],
+                    resource: { db: "shop", collection: "products" }
+                },
+                {
+                    actions: ["insert", "update", "remove"],
+                    resource: { db: "shop", collection: "productTypes" }
+                }
+            ],
+            roles: [
+                "products_viewer",
+            ]
+        }
+    )
+
+    db.createRole( // Создание роли клиента
+        {
+            role: "client",
+            privileges: [
+                {
+                    actions: ["find", "insert", "update"],
+                    resource: { db: "shop", collection: "carts" }
+                },
+                {
+                    actions: ["find", "insert"],
+                    resource: { db: "shop", collection: "orders" }
+                }
+            ],
+            roles: [
+                "products_viewer",
+            ]
+        }
+    )
+
+    db.createUser(
+        {
+            user: "some_admin_1",
+            pwd: "changeme",
+            roles: [
+                {
+                    role: "admin",
+                    db: "shop"
+                }
+            ]
+        }
+    )
+
+    db.createUser(
+        {
+            user: "manager",
+            pwd: "changeme",
+            roles: [
+                {
+                    role: "manager",
+                    db: "shop"
+                }
+            ]
+
+        }
+    )
+
+    db.createUser(
+        {
+            user: "client",
+            pwd: "changeme",
+            roles: [
+                {
+                    role: "client",
+                    db: "shop"
+                }
+            ]
+        }
+    )
+
+    db.createUser(
+        {
+            user: "viewer",
+            pwd: "changeme",
+            roles: [
+                {
+                    role: "products_viewer",
+                    db: "shop"
+                }
+            ]
+        }
+    )
+
+}
+
+function testSchemas() {
+    // 1
+    try {
+        db.products.insertOne({
+            name: "test",
+            price: Double(100),
+            type: "test", // Тип продукта должен быть ObjectId. Ожидаем ошибку
+            amount: 100
+        })
+    } catch (error) {
+        if (error.errInfo == null) {
+            return Error("Тест 1 не пройден")
+        }
+    }
+
+    // 2
+    try {
+        db.productTypes.insertOne({
+            name: 123 // Название должно быть строкой. Ожидаем ошибку
+        })
+    } catch (error) {
+        if (error.errInfo == null) {
+            return Error("Тест 2 не пройден")
+        }
+    }
+
+
+    // 3
+    try {
+        db.clients.insertOne({
+            name: "test",
+            email: "test",
+            phone: "777-999-999", // Номер телефона должен соответствовать паттерну '^[0-9]{3}-[0-9]{3}-[0-9]{4}$'. Ожидаем ошибку
+        })
+    } catch (error) {
+        if (result.errInfo == null) {
+            return Error("Тест 3 не пройден")
+        }
+    }
+
+    // 4
+    try {
+        result = db.orders.insertOne({
+            date: "01-01-2020",
+            products: [
+                {
+                    productId: "test", // ID продукта должен быть ObjectId. Ожидаем ошибку
+                    amount: 100
+                }
+            ],
+            client: ObjectId(1),
+            status: "test",
+            total: Double(100)
+        })
+    } catch (error) {
+
+        if (result.errInfo == null) {
+            return Error("Тест 4 не пройден")
+        }
+    }
+
+    return "Тесты пройдены"
+
+}
+
 function reset() {
     collectionUtils.dropAll();
     collectionUtils.createAll();
     testDataUtils.init();
 }
-
-function test() {
-    querySet.addProductToCart(testDataUtils.idStore.clients['Jane Doe'], testDataUtils.idStore.products.Samsung, 10)
-    querySet.addProductToCart(testDataUtils.idStore.clients['Jane Doe'], testDataUtils.idStore.products.Milk, 3)
-    querySet.createOrderFromCart(testDataUtils.idStore.clients['Jane Doe'])
-
-
-    querySet.addProductToCart(testDataUtils.idStore.clients['Ivan Ivanov'], testDataUtils.idStore.products.iPhone, 1)
-    querySet.addProductToCart(testDataUtils.idStore.clients['Ivan Ivanov'], testDataUtils.idStore.products['T-Shirt'], 1)
-    querySet.createOrderFromCart(testDataUtils.idStore.clients['Ivan Ivanov'])
-}
-
