@@ -6,4 +6,5 @@
 - docker compose
 
 Далее следовать README для каждой практики
-[Практика 1](practice1/)
+
+- [Практика 1](practice1/)
