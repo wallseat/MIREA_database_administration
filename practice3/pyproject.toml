@@ -1,0 +1,28 @@
+[tool.poetry]
+name = "practice3"
+version = "0.1.0"
+description = ""
+authors = ["Stanislav Lyubovsky <wallseat@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = "^0.94.0"
+uvicorn = "^0.21.0"
+motor = "^3.1.1"
+asyncpg = "^0.27.0"
+motor-stubs = "^1.7.1"
+pydantic = {extras = ["dotenv"], version = "^1.10.6"}
+
+[tool.poetry.group.dev.dependencies]
+black = "^23.1.0"
+pre-commit = "^3.1.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 89
+target-version = ['py311']
