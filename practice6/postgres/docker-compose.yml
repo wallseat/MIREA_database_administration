@@ -1,0 +1,20 @@
+version: '3.9'
+
+services:
+    primary:
+        image: postgres:15.2-alpine3.17
+        container_name: postgres__primary
+
+        environment:
+            - POSTGRES_PASSWORD=postgres
+            - POSTGRES_USER=postgres
+            - POSTGRES_DATABASE=postgres
+
+    secondary:
+        image: postgres:15.2-alpine3.17
+        container_name: postgres__secondary
+
+        environment:
+            - POSTGRES_PASSWORD=postgres
+            - POSTGRES_USER=postgres
+            - POSTGRES_DATABASE=postgres

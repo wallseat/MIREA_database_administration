@@ -1,0 +1,75 @@
+version: '3.9'
+
+services:
+    config-server:
+        image: mongo:6-jammy
+        container_name: mongo__config-server
+        networks:
+            - mongo-network
+        volumes:
+            - ./scripts/:/scripts/:ro
+        entrypoint:
+            [
+                "/usr/bin/mongod",
+                "--configsvr",
+                "--bind_ip_all",
+                "--replSet",
+                "config"
+            ]
+
+    shard1:
+        image: mongo:6-jammy
+        container_name: mongo__shard-1
+        networks:
+            - mongo-network
+        volumes:
+            - ./scripts/:/scripts/:ro
+        environment:
+            - RS_NAME=sh1
+            - HOST_NAME=shard1
+        entrypoint:
+            [
+                "/usr/bin/mongod",
+                "--shardsvr",
+                "--bind_ip_all",
+                "--replSet",
+                "sh1"
+            ]
+
+    shard2:
+        image: mongo:6-jammy
+        container_name: mongo__shard-2
+        networks:
+            - mongo-network
+        volumes:
+            - ./scripts/:/scripts/:ro
+        environment:
+            - RS_NAME=sh2
+            - HOST_NAME=shard2
+        entrypoint:
+            [
+                "/usr/bin/mongod",
+                "--shardsvr",
+                "--bind_ip_all",
+                "--replSet",
+                "sh2"
+            ]
+
+    mongo-router:
+        image: mongo:6-jammy
+        container_name: mongo__mongos
+        networks:
+            - mongo-network
+        volumes:
+            - ./scripts/:/scripts/:ro
+        entrypoint:
+            [
+                "/usr/bin/mongos",
+                "--bind_ip_all",
+                "--configdb",
+                "config/config-server:27019"
+            ]
+
+networks:
+    mongo-network:
+        driver: bridge
