@@ -1,7 +1,6 @@
 from typing import Any, AsyncGenerator
 
 import asyncpg
-from asyncpg.connection import Connection
 from asyncpg.pool import Pool
 from motor.motor_asyncio import AsyncIOMotorClient
 from src.settings import settings
@@ -17,10 +16,8 @@ async def _init_pool():
     _pool = await asyncpg.create_pool(settings.POSTGRES_DSN)
 
 
-async def _init_tables():
+async def _init_tables() -> None:
     async with _pool.acquire() as conn:
-        conn: Connection
-
         await conn.execute(
             """
             CREATE SCHEMA IF NOT EXISTS practice3;
@@ -32,7 +29,7 @@ async def _init_tables():
                 email VARCHAR(128),
                 tel VARCHAR(16)
             );
-            """
+            """,
         )
 
 

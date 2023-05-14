@@ -77,7 +77,7 @@ async def get_employee_list(
     postgres_conn: Connection,
 ) -> List[Employee]:
     result = await postgres_conn.fetch(
-        "SELECT id as id_, first_name, second_name, email, tel FROM practice3.employee"
+        "SELECT id as id_, first_name, second_name, email, tel FROM practice3.employee",
     )
 
     return parse_obj_as(List[Employee], result)

@@ -24,21 +24,21 @@ class Settings(BaseSettings):
 
     @validator("POSTGRES_DSN", pre=True)
     def construct_postgres_dsn(cls, v: Optional[str], values: Mapping[str, Any]) -> str:
-        if v == str:
+        if v is not None:
             return v
 
         return PostgresDsn.build(
             scheme="postgresql",
-            user=values.get("POSTGRES_USER"),
-            password=values.get("POSTGRES_PASSWORD"),
-            host=values.get("POSTGRES_HOST"),
-            port=values.get("POSTGRES_PORT"),
-            path="/" + values.get("POSTGRES_DB"),
+            user=values["POSTGRES_USER"],
+            password=values["POSTGRES_PASSWORD"],
+            host=values["POSTGRES_HOST"],
+            port=values["POSTGRES_PORT"],
+            path="/" + values["POSTGRES_DB"],
         )
 
     @validator("MONGO_DSN", pre=True)
     def construct_mongo_dsn(cls, v: Optional[str], values: Mapping[str, Any]) -> str:
-        if v == str:
+        if v is not None:
             return v
 
         return MongoDsn.build(
